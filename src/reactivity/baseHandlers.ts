@@ -1,4 +1,5 @@
 import { track, trigger } from './effect';
+import { ReactiveFlags } from './reactive';
 
 const get = createGetter();
 const set = createSetter();
@@ -13,6 +14,15 @@ function createGetter(isReadonly = false) {
         if (!isReadonly) {
             track(target, key);
         }
+
+        // isReactive
+        if (key === ReactiveFlags.IS_REACTIVE) {
+            return !isReadonly;
+        } // isReadonly
+        else if (key === ReactiveFlags.IS_READONLY) {
+            return isReadonly;
+        }
+
         return res;
     };
 }
@@ -22,15 +32,14 @@ function createSetter(isReadonly = false) {
     return function set(target, key, val) {
         const res = Reflect.set(target, key, val);
 
-        // TODO 触发依赖，如果是只读的则不需要触发依赖
-        if (!isReadonly) {
-            trigger(target, key);
-        }
+        // TODO 触发依赖
+        trigger(target, key);
         return res;
     };
 }
+
 export const readonlyHandlers = {
-    readonlyGet,
+    get: readonlyGet,
     set(target, key, value) {
         console.warn(`key: ${key} set 失败，因为 target 是 readonly`);
         return true;

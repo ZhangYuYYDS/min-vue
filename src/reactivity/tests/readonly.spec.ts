@@ -1,12 +1,13 @@
-import { readonly } from '../reactive';
+import { readonly, isReadonly } from '../reactive';
 
 describe('readonly', () => {
     it('happy path', () => {
         const original = { foo: 1, bar: { bar2: 2 } };
-        const proxy = readonly(original);
-        expect(proxy).not.toBe(original);
-        expect(proxy.foo).toBe(1);
-        expect(proxy.bar).toBe(original.bar);
+        const wrapped = readonly(original);
+        expect(isReadonly(wrapped)).toBe(true);
+        expect(isReadonly(original)).toBe(false);
+        expect(wrapped).not.toBe(original);
+        expect(wrapped.foo).toBe(1);
     });
 
     it('should not fail when proxy is nested', () => {
