@@ -77,7 +77,10 @@ describe('effect', () => {
         expect(dummy).toBe(2);
         stop(runner);
         // should not trigger
-        obj.prop = 3;
+        // obj.prop = 3;
+        // expect(dummy).toBe(2);
+
+        obj.prop++;
         expect(dummy).toBe(2);
         // stopped effect should still be manually callable
         runner();

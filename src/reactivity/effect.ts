@@ -1,4 +1,7 @@
 import { extend } from '../share/index';
+
+let shouldTrack;
+
 class ReactiveEffect {
     deps = [];
     active = true;
@@ -11,10 +14,18 @@ class ReactiveEffect {
     }
     run() {
         activeEffect = this;
+        if (!this.active) {
+            //false:已经clean过了，以后不用追踪
+            return this._fn();
+        }
 
-        // 调用runner函数，执行fn并return fn的返回值
-        return this._fn();
+        shouldTrack = true;
+        activeEffect = this;
+        const result = this._fn();
+        shouldTrack = false;
+        return result;
     }
+
     stop() {
         // 清除依赖
         if (this.active) {
@@ -50,6 +61,8 @@ export function track(target, key) {
     }
 
     if (!activeEffect) return;
+    // 用shouldTrack变量控制是否应该收集依赖
+    if (!shouldTrack) return;
 
     dep.add(activeEffect);
     activeEffect.deps.push(dep);
