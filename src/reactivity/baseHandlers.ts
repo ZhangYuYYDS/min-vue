@@ -1,5 +1,6 @@
 import { track, trigger } from './effect';
-import { ReactiveFlags } from './reactive';
+import { ReactiveFlags, reactive, readonly } from './reactive';
+import { isObject } from '../share';
 
 const get = createGetter();
 const set = createSetter();
@@ -9,6 +10,11 @@ const readonlyGet = createGetter(true);
 function createGetter(isReadonly = false) {
     return function get(target, key) {
         const res = Reflect.get(target, key);
+
+        // 实现 reactive 和 readonly 的嵌套对象功能:看看res是不是一个object
+        if (isObject(res)) {
+            return isReadonly ? readonly(res) : reactive(res);
+        }
 
         // TODO 依赖收集，如果是只读的则不需要收集依赖
         if (!isReadonly) {

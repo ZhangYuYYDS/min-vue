@@ -43,9 +43,17 @@ function cleanupEffect(effect: ReactiveEffect) {
     effect.deps.forEach((dep: any) => dep.delete(effect));
 }
 
+function isTracking() {
+    // 用shouldTrack变量控制是否应该收集依赖
+    // activeEffect变量表示当前调用的对象
+    return shouldTrack && activeEffect !== undefined;
+}
+
 // 收集依赖，收集的是所使用的属性的对应的函数
 const targetMap = new Map();
 export function track(target, key) {
+    if (!isTracking()) return;
+
     // target->key->dep
     let depsMap = targetMap.get(target);
 
@@ -60,10 +68,8 @@ export function track(target, key) {
         depsMap.set(key, dep);
     }
 
-    if (!activeEffect) return;
-    // 用shouldTrack变量控制是否应该收集依赖
-    if (!shouldTrack) return;
-
+    // 如果activeEffect已经在dep中了，就没有必要在添加了
+    if (dep.has(activeEffect)) return;
     dep.add(activeEffect);
     activeEffect.deps.push(dep);
 }

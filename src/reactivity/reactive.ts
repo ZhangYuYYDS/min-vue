@@ -5,6 +5,7 @@ export const enum ReactiveFlags {
     IS_READONLY = '__v_isReadonly',
 }
 
+// reactive功能
 export function reactive(raw) {
     return createActiveObject(raw, mutableHandlers);
 }
