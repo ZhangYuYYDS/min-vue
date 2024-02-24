@@ -1,5 +1,9 @@
 # min-vue
 
+# 10. 实现isReactive和isReadonly方法，用于判断一个对象是否是响应式对象和只读对象
+- 如何实现
+  - 在get操作时已经通过isReadonly变量判断了是否为只读的对象了，所以只需要触发get操作就可以通过isReadonly变量判断是否为响应式对象了，isReadonly同理
+
 # 11. 优化stop功能，使其只触发set操作
 - 明确 obj.prop=3 和 obj.prop++ 的区别
 - obj.prop=3 只触发set操作
@@ -17,4 +21,10 @@
 - 首先明确什么是(shallowReadonly)浅只读
   - shallowReadonly用于创建一个代理，使得响应式对象的第一层属性是只读的，而更深层的属性和子对象属性则不是只读的。换句话说，只有最外层的属性被设置成只读，内部的数据仍然可以进行更改。
 - 如何实现？
-  - 
+  - 通过shallow变量来控制是否只读第一层属性，shallow为true时，直接返回结果
+
+# 14. 实现isProxy功能
+- 首先明确什么是isProxy
+  - 判断一个对象是否是由reactive 和 readonly 创建的响应式代理对象
+
+
