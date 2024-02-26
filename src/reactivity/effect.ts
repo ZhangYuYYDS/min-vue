@@ -1,7 +1,7 @@
 import { extend } from '../share/index';
 
 let shouldTrack;
-
+let activeEffect; // activeEffect就是调用的对象
 class ReactiveEffect {
     deps = [];
     active = true;
@@ -43,8 +43,8 @@ function cleanupEffect(effect: ReactiveEffect) {
     effect.deps.forEach((dep: any) => dep.delete(effect));
 }
 
-function isTracking() {
-    // 用shouldTrack变量控制是否应该收集依赖
+// 用shouldTrack变量控制是否应该收集依赖
+export function isTracking() {
     // activeEffect变量表示当前调用的对象
     return shouldTrack && activeEffect !== undefined;
 }
@@ -69,15 +69,17 @@ export function track(target, key) {
     }
 
     // 如果activeEffect已经在dep中了，就没有必要在添加了
+    trackEffects(dep);
+}
+
+export function trackEffects(dep) {
     if (dep.has(activeEffect)) return;
     dep.add(activeEffect);
     activeEffect.deps.push(dep);
 }
 
-// 触发更新：将收集起来的key属性对应的所有的fn都执行一遍
-export function trigger(target, key) {
-    const depsMap = targetMap.get(target);
-    const dep = depsMap.get(key);
+export function triggerEffects(dep) {
+    // 将收集起来的依赖依次执行
     for (const effect of dep) {
         // 判断effect是否有scheduler方法
         if (effect.scheduler) {
@@ -88,8 +90,14 @@ export function trigger(target, key) {
     }
 }
 
+// 触发更新：将收集起来的key属性对应的所有的fn都执行一遍
+export function trigger(target, key) {
+    const depsMap = targetMap.get(target);
+    const dep = depsMap.get(key);
+    triggerEffects(dep);
+}
+
 // 执行函数：effect的作用就是执行函数
-let activeEffect;
 export function effect(fn, options: any = {}) {
     // fn
     const _effect = new ReactiveEffect(fn, options.scheduler);
