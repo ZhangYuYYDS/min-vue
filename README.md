@@ -56,29 +56,33 @@
   - proxyRefs 在 Vue 3 中主要用于在 setup 函数内部创建一个代理对象，该对象将 ref 对象包装成可以直接访问其值的属性。这样，当你在 setup 函数内部需要访问这些 ref 属性时，你可以像访问普通属性一样访问它们，而无需每次都通过 .value 来访问。
   - 虽然 Vue 的模板系统能够自动解包 ref 对象，使你在模板中能够直接访问其值，但在 setup 函数内部，你仍然面对的是 ref 对象。如果你希望在 setup 函数内部也能够直接访问这些值，而不想每次都写 .value，那么 proxyRefs 就非常有用。
 - 如何实现？
-  - 首先明确proxyRefs的参数类型
-    - 如果是ref对象，则直接返回其value属性
-    - 如果是基本类型，则直接返回这个值
-  - 然后通过proxy来创建一个代理对象
-  - 然后通过Object.defineProperty来定义get和set方法
-  - 在get方法中，通过target[key]来获取值，并将其转换为ref对象
-  - 在set方法中，通过target[key]来设置值，并将其转换为ref对象
+  - get时，通过unRef实现自动解构，不需要.value
+  - set时
+    - 如果新值是ref对象，则直接替换掉，不管原来的值是不是ref
+    - 如果新值是基本类型并且原来的值是ref，则直接修改.value值
 
-# 19. 实现toRefs方法
-- 明确toRefs的功能
-  - 将一个响应式对象转换为普通对象，其中每个属性都是ref对象，并且通过.操作符访问其属性
-- 如何实现？
-  - 首先明确toRefs的参数类型
-  - 然后通过Object.keys来获取响应式对象的属性名
-  - 然后通过toRef来将每个属性转换为ref对象
+# 19. 实现computed计算属性
+- 明确computed的功能
+  - 创建一个计算属性，该计算属性会根据依赖的响应式数据的变化而自动更新
+  - 计算属性的值可以是基本类型、引用类型或者函数
+  - 计算属性可以被缓存，只有当依赖的响应式数据发生变化时，才会重新计算
+  - 计算属性可以被设置为只读或可读写
+  - 计算属性可以被设置为懒加载：在没有使用.value前，计算属性不执行
+```js
+<script setup>
+import { ref, watch, reactive, computed } from 'vue';
+const value = reactive({ foo: 1 });
 
-# 20. 实现toRef方法
-- 明确toRef的功能
-  - 将一个响应式对象的属性转换为ref对象，并且通过.操作符访问其属性
-- 如何实现？
-  - 首先明确toRef的参数类型
-  - 然后通过Object.defineProperty来定义get和set方法
-  - 在get方法中，通过target[key]来获取值，并将其转换为ref对象
-  - 在set方法中，通过target[key]来设置值，并将其转换为ref对象
+// 计算属性
+const getter = () => {
+    console.log('getter函数执行了');
+    return value.foo;
+};
+const hasPublishedBooks = computed(getter);
+
+// 在没有使用.value前，getters函数不执行
+console.log(hasPublishedBooks.value);
+</script>
+```
 
 

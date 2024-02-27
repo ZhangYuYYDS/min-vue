@@ -2,7 +2,7 @@ import { extend } from '../share/index';
 
 let shouldTrack;
 let activeEffect; // activeEffect就是调用的对象
-class ReactiveEffect {
+export class ReactiveEffect {
     deps = [];
     active = true;
     onStop?: () => void;
