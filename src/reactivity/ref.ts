@@ -5,6 +5,7 @@ import { reactive } from './reactive';
 class RefImpl {
     private _rawValue: any;
     private _value: any;
+    private __v_isRef = true;
     public dep;
     constructor(value) {
         this._rawValue = value;
@@ -39,4 +40,30 @@ function trackRefValue(ref) {
 export function ref(value) {
     // 创建了一个响应式对象
     return new RefImpl(value);
+}
+
+export function isRef(ref) {
+    return !!ref.__v_isRef;
+}
+
+export function unRef(ref) {
+    return isRef(ref) ? ref.value : ref;
+}
+
+export function proxyRefs(objectWithRefs) {
+    return new Proxy(objectWithRefs, {
+        get(target, key) {
+            return unRef(Reflect.get(target, key));
+        },
+
+        // 判断一下之前的key是不是ref类型,并且新的值不是一个ref:修改value的值
+        set(target, key, value) {
+            if (isRef(target[key]) && !isRef(value)) {
+                return (target[key].value = value);
+            } else {
+                // 如果是新的值是ref：直接替换掉
+                return Reflect.set(target, key, value);
+            }
+        },
+    });
 }

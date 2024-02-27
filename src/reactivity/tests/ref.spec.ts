@@ -1,6 +1,6 @@
 import { effect } from '../effect';
 import { reactive } from '../reactive';
-import { ref } from '../ref';
+import { ref, isRef, unRef, proxyRefs } from '../ref';
 describe('ref', () => {
     it('happy path', () => {
         const a = ref(1);
@@ -39,38 +39,40 @@ describe('ref', () => {
         expect(dummy).toBe(2);
     });
 
-    // it('proxyRefs', () => {
-    //     const user = {
-    //         age: ref(10),
-    //         name: 'xiaohong',
-    //     };
-    //     const proxyUser = proxyRefs(user);
-    //     expect(user.age.value).toBe(10);
-    //     expect(proxyUser.age).toBe(10);
-    //     expect(proxyUser.name).toBe('xiaohong');
+    // 作用：针对ref，可以省略.value
+    it('proxyRefs', () => {
+        const user = {
+            age: ref(10),
+            name: 'xiaohong',
+        };
+        const proxyUser = proxyRefs(user);
+        expect(user.age.value).toBe(10);
+        expect(proxyUser.age).toBe(10);
+        expect(proxyUser.name).toBe('xiaohong');
 
-    //     (proxyUser as any).age = 20;
-    //     expect(proxyUser.age).toBe(20);
-    //     expect(user.age.value).toBe(20);
+        // set时判断一下是否是ref，如果是ref就修改.value的值；如果是则直接替换掉了
+        (proxyUser as any).age = 20;
+        expect(proxyUser.age).toBe(20);
+        expect(user.age.value).toBe(20);
 
-    //     proxyUser.age = ref(10);
-    //     expect(proxyUser.age).toBe(10);
-    //     expect(user.age.value).toBe(10);
-    // });
+        proxyUser.age = ref(10);
+        expect(proxyUser.age).toBe(10);
+        expect(user.age.value).toBe(10);
+    });
 
-    // it('isRef', () => {
-    //     const a = ref(1);
-    //     const user = reactive({
-    //         age: 1,
-    //     });
-    //     expect(isRef(a)).toBe(true);
-    //     expect(isRef(1)).toBe(false);
-    //     expect(isRef(user)).toBe(false);
-    // });
+    it('isRef', () => {
+        const a = ref(1);
+        const user = reactive({
+            age: 1,
+        });
+        expect(isRef(a)).toBe(true);
+        expect(isRef(1)).toBe(false);
+        expect(isRef(user)).toBe(false);
+    });
 
-    // it('unRef', () => {
-    //     const a = ref(1);
-    //     expect(unRef(a)).toBe(1);
-    //     expect(unRef(1)).toBe(1);
-    // });
+    it('unRef', () => {
+        const a = ref(1);
+        expect(unRef(a)).toBe(1);
+        expect(unRef(1)).toBe(1);
+    });
 });
