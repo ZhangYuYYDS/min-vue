@@ -139,12 +139,13 @@ export function createRenderer(options) {
     }
 
     function patchChildren(n1, n2, container, anchor, parentComponent) {
+        // children一共有两种类型：text 和 array
         const { shapeFlag: prevShapeFlag, children: c1 } = n1;
         const { shapeFlag, children: c2 } = n2;
 
         // 如果 n2 的 children 是 text 类型的话
         // 就看看和之前的 n1 的 children 是不是一样的
-        // 如果不一样的话直接重新设置一下 text 即可
+        // 如果不一样的话将n1的children删除并直接重新设置一下 text 即可
         if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
             if (c2 !== c1) {
                 console.log('类型为 text_children, 当前需要更新');
