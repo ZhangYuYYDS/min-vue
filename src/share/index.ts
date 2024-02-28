@@ -7,3 +7,7 @@ export function isObject(value: unknown): value is Record<any, any> {
 export const hasChanged = (newValue, oldValue) => {
     return Object.is(newValue, oldValue);
 };
+
+export function hasOwn(val, key) {
+    return Object.prototype.hasOwnProperty.call(val, key);
+}
